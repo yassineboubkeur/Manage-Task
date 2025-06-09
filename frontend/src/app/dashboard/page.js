@@ -1,16 +1,33 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { fetchTasks } from '../services/taskService';
+import { fetchTasks, deleteTask } from '../services/taskService';
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
+    loadTasks();
+  }, []);
+
+  const loadTasks = () => {
     fetchTasks()
       .then(data => setTasks(data))
       .catch(err => console.error(err));
-  }, []);
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm('Voulez-vous vraiment supprimer cette tâche ?')) return;
+
+    try {
+      await deleteTask(id);
+      // إعادة تحميل المهام بعد الحذف
+      loadTasks();
+    } catch (error) {
+      alert('Erreur lors de la suppression');
+      console.error(error);
+    }
+  };
 
   return (
     <div>
@@ -25,8 +42,11 @@ export default function Dashboard() {
             <p>{task.description}</p>
             <p>Status: {task.status}</p>
             <Link href={`/tasks/edit/${task.id}`}>
-              <button>Modifier</button>
+              <button >Modifier</button>
             </Link>
+            <button onClick={() => handleDelete(task.id)} style={{ marginLeft: '10px' }}>
+              Supprimer
+            </button>
           </li>
         ))}
       </ul>
