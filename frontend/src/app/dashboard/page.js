@@ -1,7 +1,7 @@
-'use client';
-import { useEffect, useState } from 'react';
-import Link from 'next/link';
-import { fetchTasks, deleteTask } from '../services/taskService';
+"use client";
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { fetchTasks, deleteTask } from "../services/taskService";
 
 export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
@@ -10,22 +10,24 @@ export default function Dashboard() {
     loadTasks();
   }, []);
 
-  const loadTasks = () => {
-    fetchTasks()
-      .then(data => setTasks(data))
-      .catch(err => console.error(err));
+  const loadTasks = async () => {
+    try {
+      const data = await fetchTasks();
+      setTasks(data);
+    } catch (err) {
+      console.error("❌ Failed to load tasks", err);
+    }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm('Voulez-vous vraiment supprimer cette tâche ?')) return;
+    if (!confirm("Voulez-vous vraiment supprimer cette tâche ?")) return;
 
     try {
-      await deleteTask(id);
-      // إعادة تحميل المهام بعد الحذف
-      loadTasks();
+      await deleteTask(id); // ما كتدير لا .then() لا res.json()
+      loadTasks(); // عاد كتحمّل المهام
     } catch (error) {
-      alert('Erreur lors de la suppression');
-      console.error(error);
+      alert("Erreur lors de la suppression");
+      console.error("❌ Delete error:", error);
     }
   };
 
@@ -36,15 +38,18 @@ export default function Dashboard() {
         <button>Ajouter une tâche</button>
       </Link>
       <ul>
-        {tasks.map(task => (
+        {tasks.map((task) => (
           <li key={task.id}>
             <h3>{task.title}</h3>
             <p>{task.description}</p>
             <p>Status: {task.status}</p>
             <Link href={`/tasks/edit/${task.id}`}>
-              <button >Modifier</button>
+              <button>Modifier</button>
             </Link>
-            <button onClick={() => handleDelete(task.id)} style={{ marginLeft: '10px' }}>
+            <button
+              onClick={() => handleDelete(task.id)}
+              style={{ marginLeft: "10px" }}
+            >
               Supprimer
             </button>
           </li>

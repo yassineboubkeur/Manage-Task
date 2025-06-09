@@ -49,8 +49,6 @@ export async function deleteTask(id) {
   if (!res.ok) {
     throw new Error("Failed to delete task");
   }
-
-  // ما تحاولش تقرا JSON نهائيا، فقط رجع
   return;
 }
 
