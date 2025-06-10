@@ -1,10 +1,13 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.Task;
+import com.example.demo.model.User;
 import com.example.demo.repository.TaskRepository;
+import com.example.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.security.Principal;
 
 import java.util.List;
 
@@ -15,42 +18,58 @@ public class TaskController {
     @Autowired
     private TaskRepository taskRepository;
 
-    @GetMapping
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
-    }
+    @Autowired
+    private UserRepository userRepository;
 
-    @GetMapping("/{id}")
-    public Task getTaskById(@PathVariable Long id) {
-        return taskRepository.findById(id).orElse(null);
+    // جلب المهام ديال المستخدم اللي داخل فقط
+    @GetMapping
+    public List<Task> getAllTasks(Principal principal) {
+        String username = principal.getName();
+        return taskRepository.findByUserUsername(username);
     }
 
     @PostMapping
-    public Task createTask(@RequestBody Task task) {
-        return taskRepository.save(task);
+    public ResponseEntity<Task> createTask(@RequestBody Task task, Principal principal) {
+        String username = principal.getName();
+        User user = userRepository.findByUsername(username);
+
+        if (user == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        task.setUser(user);
+        Task saved = taskRepository.save(task);
+        return ResponseEntity.status(201).body(saved);
     }
 
+    // تعديل مهمة (نتأكد أنها ديال المستخدم اللي داخل)
     @PutMapping("/{id}")
-    public Task updateTask(@PathVariable Long id, @RequestBody Task taskDetails) {
+    public ResponseEntity<Task> updateTask(@PathVariable Long id, @RequestBody Task taskDetails, Principal principal) {
+        String username = principal.getName();
+
         Task task = taskRepository.findById(id).orElse(null);
-        if (task != null) {
-            task.setTitle(taskDetails.getTitle());
-            task.setDescription(taskDetails.getDescription());
-            task.setStatus(taskDetails.getStatus());
-            task.setUser(taskDetails.getUser());
-            return taskRepository.save(task);
+        if (task == null || !task.getUser().getUsername().equals(username)) {
+            return ResponseEntity.status(403).build(); // Forbidden
         }
-        return null;
+
+        task.setTitle(taskDetails.getTitle());
+        task.setDescription(taskDetails.getDescription());
+        task.setStatus(taskDetails.getStatus());
+        Task updated = taskRepository.save(task);
+        return ResponseEntity.ok(updated);
     }
 
+    // حذف مهمة (نتأكد أنها ديال المستخدم اللي داخل)
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
-        if (!taskRepository.existsById(id)) {
-            return ResponseEntity.notFound().build(); // 404
+    public ResponseEntity<Void> deleteTask(@PathVariable Long id, Principal principal) {
+        String username = principal.getName();
+
+        Task task = taskRepository.findById(id).orElse(null);
+        if (task == null || !task.getUser().getUsername().equals(username)) {
+            return ResponseEntity.status(403).build();
         }
 
-        taskRepository.deleteById(id);
-        return ResponseEntity.noContent().build(); // 204
+        taskRepository.delete(task);
+        return ResponseEntity.noContent().build();
     }
-
 }
