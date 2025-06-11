@@ -1,9 +1,8 @@
 package com.example.demo.controller;
 
 import com.example.demo.model.User;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -12,85 +11,40 @@ import java.util.List;
 @RequestMapping("/api")
 public class UserController {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
 
     @Autowired
-    public UserController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
-    // ✅ تسجيل مستخدم جديد
     @PostMapping("/register")
     public Object registerUser(@RequestBody User user) {
-        if (userRepository.findByUsername(user.getUsername()) != null) {
-            return new ErrorResponse("Nom d'utilisateur déjà utilisé.");
-        }
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+        return userService.register(user);
     }
 
-    // ✅ تسجيل الدخول
     @PostMapping("/login")
     public Object loginUser(@RequestBody User loginRequest) {
-        User user = userRepository.findByUsername(loginRequest.getUsername());
-
-        if (user == null) {
-            return new ErrorResponse("Nom d'utilisateur incorrect.");
-        }
-
-        if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            return new ErrorResponse("Mot de passe incorrect.");
-        }
-
-        return new SuccessResponse("Connexion réussie !");
+        return userService.login(loginRequest);
     }
 
-    // ✅ الحصول على جميع المستخدمين
     @GetMapping("/users")
     public List<User> getAllUsers() {
-        return userRepository.findAll();
+        return userService.getAllUsers();
     }
 
-    // ✅ الحصول على مستخدم واحد
     @GetMapping("/users/{id}")
     public User getUserById(@PathVariable Long id) {
-        return userRepository.findById(id).orElse(null);
+        return userService.getUserById(id);
     }
 
-    // ✅ تعديل مستخدم
     @PutMapping("/users/{id}")
     public User updateUser(@PathVariable Long id, @RequestBody User userDetails) {
-        User user = userRepository.findById(id).orElse(null);
-        if (user != null) {
-            user.setUsername(userDetails.getUsername());
-            user.setPassword(passwordEncoder.encode(userDetails.getPassword()));
-            return userRepository.save(user);
-        }
-        return null;
+        return userService.updateUser(id, userDetails);
     }
 
-    // ✅ حذف مستخدم
     @DeleteMapping("/users/{id}")
     public void deleteUser(@PathVariable Long id) {
-        userRepository.deleteById(id);
-    }
-
-    // ✅ كلاس داخلي للخطأ
-    static class ErrorResponse {
-        public String message;
-
-        public ErrorResponse(String message) {
-            this.message = message;
-        }
-    }
-
-    static class SuccessResponse {
-        public String message;
-
-        public SuccessResponse(String message) {
-            this.message = message;
-        }
+        userService.deleteUser(id);
     }
 }

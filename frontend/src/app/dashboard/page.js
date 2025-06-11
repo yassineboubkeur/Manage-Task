@@ -7,6 +7,12 @@ export default function Dashboard() {
   const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
+    const token = localStorage.getItem("jwtToken");
+  if (!token) {
+    console.warn("🔒 Aucun token trouvé. Redirection vers login...");
+    router.push("/login");
+    return;
+  }
     loadTasks();
   }, []);
 

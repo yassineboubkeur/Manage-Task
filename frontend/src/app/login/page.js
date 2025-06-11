@@ -1,25 +1,34 @@
 "use client";
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState,useEffect } from "react";
+import { useRouter } from "next/navigation";
+
 
 export default function Login() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const router = useRouter();
+  useEffect(() => {
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+    loadTasks();
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
 
     try {
-      const res = await fetch('http://localhost:8081/api/login', {
-        method: 'POST',
+      const res = await fetch("http://localhost:8081/api/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ username, password }),
       });
@@ -29,12 +38,14 @@ export default function Login() {
         setSuccess("Connexion réussie !");
         // Optionnel : tu peux stocker le token si backend retourne un
         // localStorage.setItem('token', data.token);
-        setUsername('');
-        setPassword('');
-        router.push('/dashboard');
+        setUsername("");
+        setPassword("");
+        router.push("/dashboard");
       } else {
         const data = await res.json();
-        setError(data.message || "Nom d'utilisateur ou mot de passe incorrect.");
+        setError(
+          data.message || "Nom d'utilisateur ou mot de passe incorrect."
+        );
       }
     } catch (err) {
       setError("Erreur de connexion au serveur.");
@@ -61,8 +72,8 @@ export default function Login() {
         />
         <button type="submit">Se connecter</button>
       </form>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      {success && <p style={{ color: 'green' }}>{success}</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+      {success && <p style={{ color: "green" }}>{success}</p>}
     </div>
   );
 }

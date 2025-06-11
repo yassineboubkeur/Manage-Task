@@ -1,12 +1,15 @@
 package com.example.demo.config;
 
+import com.example.demo.security.JwtAuthFilter; 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -16,16 +19,29 @@ import java.util.List;
 @Configuration
 public class SecurityConfig {
 
+    private final JwtAuthFilter jwtAuthFilter;
+
+    public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
+        this.jwtAuthFilter = jwtAuthFilter;
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            .cors(Customizer.withDefaults()) // يفعّل CORS ويستخدم bean corsConfigurationSource
+            .cors(Customizer.withDefaults())
             .csrf(csrf -> csrf.disable())
+            // نعطي الصلاحية لـ register و login فقط
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/register", "/api/login", "/api/tasks", "/api/tasks/**").permitAll()
+                .requestMatchers("/api/register", "/api/login").permitAll()
+                .requestMatchers("/api/**").permitAll() 
                 .anyRequest().authenticated())
-            .httpBasic(Customizer.withDefaults())
+            // نعطل الجلسات (stateless)
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            // نضيف فلتر JWT قبل فلتر اليوزر باسورد
+            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+            // نلغي الفورم لوجين و httpBasic
             .formLogin(form -> form.disable())
+            .httpBasic(httpBasic -> httpBasic.disable())
             .logout(logout -> logout.disable());
 
         return http.build();

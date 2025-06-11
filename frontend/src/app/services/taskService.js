@@ -1,8 +1,20 @@
 "use client";
 const API_URL = "http://localhost:8081/api/tasks";
 
+function getAuthHeaders() {
+  const token = localStorage.getItem("jwtToken");
+  return {
+    "Content-Type": "application/json",
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+  console.log("➡️ Headers envoyés:", headers);
+  return headers;
+}
+
 export async function fetchTasks() {
-  const res = await fetch(API_URL);
+  const res = await fetch(API_URL, {
+    headers: getAuthHeaders(),
+  });
   if (!res.ok) {
     throw new Error("Failed to fetch tasks");
   }
@@ -12,7 +24,7 @@ export async function fetchTasks() {
 export async function addTask(task) {
   const res = await fetch(API_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders(),
     body: JSON.stringify(task),
   });
   if (!res.ok) {
@@ -24,7 +36,7 @@ export async function addTask(task) {
 export async function updateTask(id, task) {
   const res = await fetch(`${API_URL}/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: getAuthHeaders(),
     body: JSON.stringify(task),
   });
   if (!res.ok) {
@@ -34,7 +46,9 @@ export async function updateTask(id, task) {
 }
 
 export async function getTaskById(id) {
-  const res = await fetch(`${API_URL}/${id}`);
+  const res = await fetch(`${API_URL}/${id}`, {
+    headers: getAuthHeaders(),
+  });
   if (!res.ok) {
     throw new Error("Failed to fetch task");
   }
@@ -44,6 +58,7 @@ export async function getTaskById(id) {
 export async function deleteTask(id) {
   const res = await fetch(`${API_URL}/${id}`, {
     method: "DELETE",
+    headers: getAuthHeaders(),
   });
 
   if (!res.ok) {
@@ -51,5 +66,3 @@ export async function deleteTask(id) {
   }
   return;
 }
-
-
