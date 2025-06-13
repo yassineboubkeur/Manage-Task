@@ -3,13 +3,14 @@ const API_URL = "http://localhost:8081/api/tasks";
 
 function getAuthHeaders() {
   const token = localStorage.getItem("jwtToken");
-  return {
+  const headers = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
-  console.log("➡️ Headers envoyés:", headers);
+  console.log("➡️ Headers envoyés:", headers); // ✅ دابا كيتنفذ
   return headers;
 }
+
 
 export async function fetchTasks() {
   const res = await fetch(API_URL, {

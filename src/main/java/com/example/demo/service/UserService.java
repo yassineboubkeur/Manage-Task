@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+
 @Service
 public class UserService {
 
@@ -69,28 +70,22 @@ public class UserService {
         userRepository.deleteById(id);
     }
 
-    // الكلاسات الخاصة بالرد
     public static class ErrorResponse {
-        public String message;
+    private final String message;
+    public ErrorResponse(String message) { this.message = message; }
+    public String getMessage() { return message; }
+}
 
-        public ErrorResponse(String message) {
-            this.message = message;
-        }
-    }
+public static class SuccessResponse {
+    private final String message;
+    public SuccessResponse(String message) { this.message = message; }
+    public String getMessage() { return message; }
+}
 
-    public static class SuccessResponse {
-        public String message;
+public static class TokenResponse {
+    private final String token;
+    public TokenResponse(String token) { this.token = token; }
+    public String getToken() { return token; }
+}
 
-        public SuccessResponse(String message) {
-            this.message = message;
-        }
-    }
-
-    public static class TokenResponse {
-        public String token;
-
-        public TokenResponse(String token) {
-            this.token = token;
-        }
-    }
 }

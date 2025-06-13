@@ -13,10 +13,9 @@ export default function Login() {
   useEffect(() => {
     const token = localStorage.getItem("jwtToken");
     if (!token) {
-      router.push("/login");
+      router.push("/dashboard");
       return;
     }
-    loadTasks();
   }, []);
 
   const handleLogin = async (e) => {
@@ -37,7 +36,7 @@ export default function Login() {
         const data = await res.json();
         setSuccess("Connexion réussie !");
         // Optionnel : tu peux stocker le token si backend retourne un
-        // localStorage.setItem('token', data.token);
+        localStorage.setItem('jwtToken', data.token);
         setUsername("");
         setPassword("");
         router.push("/dashboard");
