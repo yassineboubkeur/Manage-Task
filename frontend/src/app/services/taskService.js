@@ -7,7 +7,7 @@ function getAuthHeaders() {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
-  console.log("➡️ Headers envoyés:", headers); // ✅ دابا كيتنفذ
+  console.log("➡️ Headers envoyés:", headers); 
   return headers;
 }
 
@@ -40,7 +40,10 @@ export async function updateTask(id, task) {
     headers: getAuthHeaders(),
     body: JSON.stringify(task),
   });
+  console.log("➡️ Response status:", res.status);
   if (!res.ok) {
+    const text = await res.text();
+    console.error("Failed to update task:", text);
     throw new Error("Failed to update task");
   }
   return res.json();

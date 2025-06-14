@@ -24,6 +24,17 @@ public class TaskService {
         return taskRepository.findByUserUsername(username);
     }
 
+    public Task getTaskById(Long id, String username) {
+        Task task = taskRepository.findById(id).orElse(null);
+        if (task == null) {
+            return null; // task ما لقيتيهش
+        }
+        if (!task.getUser().getUsername().equals(username)) {
+            throw new RuntimeException("Forbidden"); // user ما عندوش الحق
+        }
+        return task;
+    }
+
     public Task createTask(Task task, String username) {
         User user = userRepository.findByUsername(username);
         if (user == null) {
@@ -36,6 +47,8 @@ public class TaskService {
     public Task updateTask(Long id, Task taskDetails, String username) {
         Task task = taskRepository.findById(id).orElseThrow(() -> new RuntimeException("Task not found"));
 
+        System.out.println("➡️ Authenticated username: " + username);
+        System.out.println("➡️ Task owner username: " + task.getUser().getUsername());
         if (!task.getUser().getUsername().equals(username)) {
             throw new RuntimeException("Forbidden");
         }

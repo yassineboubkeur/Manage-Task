@@ -19,7 +19,6 @@ public class TaskController {
         this.taskService = taskService;
     }
 
-
     private String getCurrentUsername() {
         return SecurityContextHolder.getContext().getAuthentication().getName();
     }
@@ -28,6 +27,20 @@ public class TaskController {
     public List<Task> getAllTasks() {
         String username = getCurrentUsername();
         return taskService.getAllTasks(username);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Task> getTaskById(@PathVariable Long id) {
+        String username = getCurrentUsername();
+        try {
+            Task task = taskService.getTaskById(id, username);
+            if (task == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(task);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(403).build();
+        }
     }
 
     @PostMapping
