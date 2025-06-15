@@ -1,6 +1,7 @@
 "use client";
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function Register() {
   const [username, setUsername] = useState('');
@@ -26,7 +27,7 @@ export default function Register() {
     }
 
     try {
-      const res = await fetch('http://localhost:8081/api/auth/register', {
+      const res = await fetch(`${apiBaseUrl}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
@@ -117,6 +118,12 @@ export default function Register() {
       </form>
       {error && <p style={{ color: "red", marginTop: "1rem", textAlign: "center" }}>{error}</p>}
       {success && <p style={{ color: "green", marginTop: "1rem", textAlign: "center" }}>{success}</p>}
+      <p style={{ textAlign: "center", marginTop: "1rem" }}>
+      Déjà un compte ?{" "}
+      <a href="/login" style={{ color: "#0070f3", textDecoration: "underline", cursor: "pointer" }}>
+        Connectez-vous ici
+      </a>
+    </p>
     </div>
   );
 }

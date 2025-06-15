@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../context/AuthContext.js";
+const apiBaseUrl = process.env.NEXT_PUBLIC_API_BASE_URL;
 
 export default function Login() {
   const [username, setUsername] = useState("");
@@ -21,7 +22,7 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:8081/api/auth/login", {
+      const res = await fetch(`${apiBaseUrl}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -106,6 +107,12 @@ export default function Login() {
       </form>
       {error && <p style={{ color: "red", marginTop: "1rem", textAlign: "center" }}>{error}</p>}
       {success && <p style={{ color: "green", marginTop: "1rem", textAlign: "center" }}>{success}</p>}
+      <p style={{ textAlign: "center", marginTop: "1rem" }}>
+      Pas de compte ?{" "}
+      <a href="/register" style={{ color: "#0070f3", textDecoration: "underline", cursor: "pointer" }}>
+        Inscrivez-vous ici
+      </a>
+    </p>
     </div>
   );
 }
