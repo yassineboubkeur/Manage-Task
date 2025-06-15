@@ -1,6 +1,7 @@
 "use client";
 import { useState,useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "../context/AuthContext.js";
 
 
 export default function Login() {
@@ -9,22 +10,16 @@ export default function Login() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const router = useRouter();
-  useEffect(() => {
-    const token = localStorage.getItem("jwtToken");
-    if (!token) {
-      router.push("/dashboard");
-      return;
-    }
-  }, []);
+  const { login } = useAuth();
 
-  const handleLogin = async (e) => {
+const router = useRouter();
+    const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
     try {
-      const res = await fetch("http://localhost:8081/api/login", {
+      const res = await fetch("http://localhost:8081/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -36,7 +31,7 @@ export default function Login() {
         const data = await res.json();
         setSuccess("Connexion réussie !");
         // Optionnel : tu peux stocker le token si backend retourne un
-        localStorage.setItem('jwtToken', data.token);
+        login(data.token);
         setUsername("");
         setPassword("");
         router.push("/dashboard");

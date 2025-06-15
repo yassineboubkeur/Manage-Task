@@ -1,22 +1,27 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { use } from 'react'; // 👈 مهم جداً!
 import { addTask, updateTask, getTaskById } from '../../../services/taskService';
 
 export default function AddEditTask({ params }) {
   const router = useRouter();
-  const taskId = params?.id;
+  const resolvedParams = use(params); // 👈 نحل Promise ديال params
+  const taskId = resolvedParams?.id;
+
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [status, setStatus] = useState('');
 
   useEffect(() => {
     if (taskId) {
-      getTaskById(taskId).then(task => {
-        setTitle(task.title);
-        setDescription(task.description);
-        setStatus(task.status);
-      }).catch(err => console.error(err));
+      getTaskById(taskId)
+        .then(task => {
+          setTitle(task.title);
+          setDescription(task.description);
+          setStatus(task.status);
+        })
+        .catch(err => console.error(err));
     }
   }, [taskId]);
 
